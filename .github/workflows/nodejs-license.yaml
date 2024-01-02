@@ -21,6 +21,7 @@ env:
     WTFPL;
     Unlicense;
     BlueOak-1.0.0;
+    Attribution-ShareAlike 4.0 International;
   # It has to be one line, there must be no space between packages.
   EXCLUDE_PACKAGES: testrpc@0.0.1;uuid@2.0.1;
 
