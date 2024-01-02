@@ -14,11 +14,14 @@ env:
     CC0-1.0;
     CC-BY-3.0;
     CC-BY-4.0;
+    CC-BY-SA-4.0;
+    CC BY-SA 4.0;
     Python-2.0;
     PSF;
     Public Domain;
     WTFPL;
     Unlicense;
+    BlueOak-1.0.0;
   # It has to be one line, there must be no space between packages.
   EXCLUDE_PACKAGES: testrpc@0.0.1;uuid@2.0.1;
 
