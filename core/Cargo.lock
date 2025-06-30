@@ -4359,6 +4359,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "heartbeat"
+version = "28.7.0-non-semver-compat"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "tokio",
+ "tracing",
+ "zksync_node_framework",
+ "zksync_vlog",
+]
+
+[[package]]
 name = "heck"
 version = "0.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

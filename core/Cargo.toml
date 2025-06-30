@@ -84,7 +84,7 @@ members = [
   "lib/test_contracts",
   # Test infrastructure
   "tests/loadnext",
-  "tests/vm-benchmark",
+  "tests/vm-benchmark", "bin/heartbeat",
 ]
 resolver = "2"
 
