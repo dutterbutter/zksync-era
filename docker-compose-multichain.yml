@@ -1,0 +1,161 @@
+services:
+  # Base infrastructure services (L1 and database)
+  reth:
+    restart: always
+    image: "ghcr.io/paradigmxyz/reth:v1.3.7"
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    ports:
+      - 127.0.0.1:8545:8545
+    volumes:
+      - type: volume
+        source: reth-data
+        target: /rethdata
+      - type: bind
+        source: ./etc/reth/chaindata
+        target: /chaindata
+    command: node --dev --datadir /rethdata --http --http.addr 0.0.0.0 --http.port 8545 --http.corsdomain "*" --chain /chaindata/reth_config --dev.block-time 300ms
+    networks:
+      - zkstack
+
+  postgres:
+    image: "postgres:14"
+    restart: always
+    command: postgres -c 'max_connections=1000'
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    ports:
+      - 127.0.0.1:5432:5432
+    volumes:
+      - type: volume
+        source: postgres-data
+        target: /var/lib/postgresql/data
+    environment:
+      - POSTGRES_PASSWORD=notsecurepassword
+    networks:
+      - zkstack
+
+  # Main orchestrator service for setting up all chains
+  zkstack-orchestrator:
+    image: "ghcr.io/matter-labs/zk-environment:latest2.0-lightweight"
+    depends_on:
+      - reth
+      - postgres
+    security_opt:
+      - seccomp:unconfined
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    volumes:
+      - .:/usr/src/zksync
+      - /usr/src/cache:/usr/src/cache
+      - /var/run/docker.sock:/var/run/docker.sock
+      - ./hardhat-nodejs:/root/.cache/hardhat-nodejs
+      - zkstack-data:/data
+    environment:
+      - ZKSYNC_HOME=/usr/src/zksync
+      - PATH=/usr/src/zksync/bin:/usr/src/zksync/zkstack_cli/zkstackup:${PATH}
+      - CI=1
+    networks:
+      - zkstack
+    command: ["./scripts/multichain-setup.sh"]
+    working_dir: /usr/src/zksync
+
+  # Gateway chain server (port 3070-3075)
+  gateway-server:
+    image: "ghcr.io/matter-labs/zk-environment:latest2.0-lightweight"
+    depends_on:
+      zkstack-orchestrator:
+        condition: service_completed_successfully
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    volumes:
+      - .:/usr/src/zksync
+      - zkstack-data:/data
+    environment:
+      - ZKSYNC_HOME=/usr/src/zksync
+      - PATH=/usr/src/zksync/bin:/usr/src/zksync/zkstack_cli/zkstackup:${PATH}
+    ports:
+      - "3070:3070"  # http_api  
+      - "3071:3071"  # ws_api
+      - "3072:3072"  # health
+      - "3073:3073"  # tree_api
+      - "3074:3074"  # prometheus metrics
+    networks:
+      - zkstack
+    command: ["tail", "-f", "/dev/null"]  # Keep running - actual server will be started by orchestrator
+    working_dir: /usr/src/zksync
+
+  # Are chain server (port 3080-3085)  
+  are-server:
+    image: "ghcr.io/matter-labs/zk-environment:latest2.0-lightweight"
+    depends_on:
+      zkstack-orchestrator:
+        condition: service_completed_successfully
+      gateway-server:
+        condition: service_started
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    volumes:
+      - .:/usr/src/zksync
+      - zkstack-data:/data
+    environment:
+      - ZKSYNC_HOME=/usr/src/zksync
+      - PATH=/usr/src/zksync/bin:/usr/src/zksync/zkstack_cli/zkstackup:${PATH}
+    ports:
+      - "3080:3080"  # http_api
+      - "3081:3081"  # ws_api  
+      - "3082:3082"  # health
+      - "3083:3083"  # tree_api
+      - "3084:3084"  # prometheus metrics
+    networks:
+      - zkstack
+    command: ["tail", "-f", "/dev/null"]  # Keep running - actual server will be started by orchestrator
+    working_dir: /usr/src/zksync
+
+  # Dutterbutter chain server (port 3090-3095)
+  dutterbutter-server:
+    image: "ghcr.io/matter-labs/zk-environment:latest2.0-lightweight"
+    depends_on:
+      zkstack-orchestrator:
+        condition: service_completed_successfully
+      gateway-server:
+        condition: service_started
+    ulimits:
+      nofile:
+        soft: 1048576
+        hard: 1048576
+    volumes:
+      - .:/usr/src/zksync
+      - zkstack-data:/data
+    environment:
+      - ZKSYNC_HOME=/usr/src/zksync
+      - PATH=/usr/src/zksync/bin:/usr/src/zksync/zkstack_cli/zkstackup:${PATH}
+    ports:
+      - "3090:3090"  # http_api
+      - "3091:3091"  # ws_api
+      - "3092:3092"  # health
+      - "3093:3093"  # tree_api  
+      - "3094:3094"  # prometheus metrics
+    networks:
+      - zkstack
+    command: ["tail", "-f", "/dev/null"]  # Keep running - actual server will be started by orchestrator
+    working_dir: /usr/src/zksync
+
+volumes:
+  postgres-data:
+  reth-data:
+  zkstack-data:
+
+networks:
+  zkstack:
+    driver: bridge
