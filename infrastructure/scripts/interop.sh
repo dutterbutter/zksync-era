@@ -63,6 +63,12 @@ check_prerequisites() {
 start_l1() {
     log "Starting L1 node on port $L1_RPC_PORT..."
     
+    # Check if L1 is already running
+    if check_chainid "http://127.0.0.1:$L1_RPC_PORT" >/dev/null 2>&1; then
+        log "L1 node already running, skipping startup"
+        return 0
+    fi
+    
     # Clean containers and start L1
     $ZKSTACK_BIN dev clean containers
     $ZKSTACK_BIN up -o false
@@ -75,6 +81,12 @@ start_l1() {
 # Start Gateway chain
 start_gateway() {
     log "Starting Gateway chain on port $GATEWAY_RPC_PORT..."
+    
+    # Check if Gateway is already running
+    if check_chainid "http://127.0.0.1:$GATEWAY_RPC_PORT" >/dev/null 2>&1; then
+        log "Gateway chain already running, skipping startup"
+        return 0
+    fi
     
     # Create Gateway chain if not exists
     if ! $ZKSTACK_BIN chain list 2>/dev/null | grep -q "gateway"; then
@@ -119,6 +131,12 @@ start_gateway() {
 start_era() {
     log "Starting Era chain on port $ERA_RPC_PORT..."
     
+    # Check if Era is already running
+    if check_chainid "http://127.0.0.1:$ERA_RPC_PORT" >/dev/null 2>&1; then
+        log "Era chain already running, skipping startup"
+        return 0
+    fi
+    
     # Create Era chain if not exists
     if ! $ZKSTACK_BIN chain list 2>/dev/null | grep -q "era"; then
         log "Creating Era chain..."
@@ -146,6 +164,12 @@ start_era() {
 # Start Era2 chain
 start_era2() {
     log "Starting Era2 chain on port $ERA2_RPC_PORT..."
+    
+    # Check if Era2 is already running
+    if check_chainid "http://127.0.0.1:$ERA2_RPC_PORT" >/dev/null 2>&1; then
+        log "Era2 chain already running, skipping startup"
+        return 0
+    fi
     
     # Create Era2 chain if not exists (using validium as Era2)
     if ! $ZKSTACK_BIN chain list 2>/dev/null | grep -q "validium"; then
@@ -245,7 +269,12 @@ wait_for_rpc() {
             return 0
         fi
         
-        log "Attempt $attempt/$max_attempts - $name RPC not ready yet..."
+        if [ $attempt -eq 1 ]; then
+            log "Waiting for $name RPC to start..."
+        elif [ $((attempt % 5)) -eq 0 ]; then
+            log "Still waiting for $name RPC... (attempt $attempt/$max_attempts)"
+        fi
+        
         sleep 2
         attempt=$((attempt + 1))
     done
