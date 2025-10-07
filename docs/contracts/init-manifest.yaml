@@ -3,6 +3,39 @@
 # to register and configure a ZK Stack chain (Localhost rollup mode)
 
 init_plan:
+  # Phase 0: Fund Wallets (Localhost only)
+  - id: distribute_eth_to_wallets
+    from_role: ecosystem_operator
+    method: "ETH transfers via provider.sendTransaction()"
+    params:
+      recipients:
+        - "<chain_operator>"
+        - "<chain_blob_operator>"
+        - "<chain_governor>"
+        - "<chain_deployer>"
+        - "<chain_token_multiplier_setter>"
+      amount_each: "1000 ETH"
+    depends_on: []
+    idempotency_check: "balance(<recipient>) >= 1000 ETH"
+    postcondition: "all recipients have >= 1000 ETH"
+    notes: "Distribute ETH to chain wallets for gas (Localhost L1Network only)"
+    optional: true
+    localhost_only: true
+
+  - id: mint_base_token_to_wallets
+    from_role: ecosystem_governor
+    method: "BaseToken.mint(address,uint256)"
+    params:
+      recipients:
+        - "<ecosystem_governor>"
+        - "<chain_governor>"
+      amount_each: "<1000 * nominator / denominator base tokens>"
+    depends_on: []
+    idempotency_check: "baseToken.balanceOf(<recipient>) >= <amount>"
+    postcondition: "all recipients have sufficient base token balance"
+    notes: "Mint base tokens to governors (Localhost only, if using non-ETH base token)"
+    optional: true
+    localhost_only: true
   # Phase 1: CTM Registration (if using new CTM)
   - id: register_ctm
     from_role: governor
@@ -281,6 +314,22 @@ l2_genesis_plan:
     notes: "TestnetPaymaster (optional, for testnet only)"
     predeployed: true
     optional: true
+
+# Phase 11: Generate Genesis (Localhost - before starting L2)
+genesis_generation:
+  - id: generate_genesis_config
+    notes: "Generate genesis.yaml with initial state root and commitment"
+    method: "zkstack chain genesis init"
+    depends_on: [register_zk_chain]
+    output_files:
+      - "chains/<chain-name>/configs/genesis.yaml"
+    notes: "Generates genesis state root, rollup leaf index, and batch commitment"
+
+  - id: run_genesis_on_server
+    notes: "Initialize server database with genesis state"
+    method: "zkstack server genesis"
+    depends_on: [generate_genesis_config]
+    notes: "Populates Postgres DB with genesis block and state"
 
 # Notes on Roles:
 # - governor: L1 Governance contract (or owner for localhost)

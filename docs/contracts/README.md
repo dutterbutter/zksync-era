@@ -22,6 +22,7 @@ These manifests serve as the **source of truth** for:
 | **[init-manifest.yaml](./init-manifest.yaml)** | Initialization transaction manifest (chain registration & config) |
 | **[source-map.json](./source-map.json)** | Maps manifest steps to zkstack CLI functions and Foundry scripts |
 | **[validation.md](./validation.md)** | Validation runbook with preconditions, checks, and troubleshooting |
+| **[VALIDIUM_DELTAS.md](./VALIDIUM_DELTAS.md)** | Differences between rollup and validium modes |
 
 ## Quick Start
 
@@ -201,7 +202,9 @@ The tool would:
 
 ## Deltas for Validium Mode
 
-Most contracts and steps are the same for rollup and validium modes. Key differences:
+Most contracts and steps are the same for rollup and validium modes. Key differences are documented in **[VALIDIUM_DELTAS.md](./VALIDIUM_DELTAS.md)**.
+
+Summary of key differences:
 
 | Component | Rollup | Validium |
 |-----------|--------|----------|
@@ -209,6 +212,8 @@ Most contracts and steps are the same for rollup and validium modes. Key differe
 | **L2 DA Validator** | Rollup L2 DA Validator | Validium L2 DA Validator |
 | **DA Manager** | `RollupL1DAManager` | Not used (validium uses off-chain DA) |
 | **Commitment Data** | Full data posted to L1 (blobs or calldata) | Only commitment hash posted to L1 |
+
+For complete details including configuration, validation, and migration procedures, see **[VALIDIUM_DELTAS.md](./VALIDIUM_DELTAS.md)**.
 
 To use validium mode:
 - Set `validium_mode: true` in chain config
