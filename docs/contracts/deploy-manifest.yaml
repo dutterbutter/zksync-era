@@ -1,0 +1,500 @@
+# ZK Stack Deployment Manifest
+# This manifest describes the L1 contract deployment sequence for a ZK Stack chain (Localhost rollup mode)
+
+deploy_plan:
+  # Phase 1: Core Infrastructure
+  - id: create2_factory_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "Create2Factory.constructor()"
+    params: []
+    deployment: create
+    idempotency_check: "code_at(<create2_factory>) != 0x"
+    postcondition: "code_at(<create2_factory>) != 0x"
+    notes: "Deterministic deployment factory for CREATE2 contracts"
+
+  - id: proxy_admin_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "ProxyAdmin.constructor()"
+    params: []
+    deployment: create
+    idempotency_check: "code_at(<proxy_admin>) != 0x"
+    postcondition: "code_at(<proxy_admin>) != 0x"
+    notes: "Admin contract for all transparent proxies"
+
+  - id: governance_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "Governance.constructor(address,address,uint256)"
+    params:
+      - "<owner_address>"
+      - "<governance_security_council_address>"
+      - "<governance_min_delay>"
+    deployment: create
+    depends_on: []
+    idempotency_check: "code_at(<governance_addr>) != 0x"
+    postcondition: "code_at(<governance_addr>) != 0x && governance.owner() == <owner_address>"
+    notes: "L1 governance contract with timelock"
+
+  # Phase 2: Bridgehub & Message Infrastructure
+  - id: bridgehub_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_bridgehub>"
+      bytecode: "<bridgehub_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<bridgehub_impl>) != 0x"
+    postcondition: "code_at(<bridgehub_impl>) != 0x"
+    notes: "Bridgehub implementation (logic contract)"
+
+  - id: bridgehub_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<bridgehub_impl>"
+      - "<proxy_admin>"
+      - "0x"
+    deployment: create
+    depends_on: [bridgehub_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<bridgehub_proxy>) != 0x"
+    postcondition: "proxy_impl(<bridgehub_proxy>) == <bridgehub_impl> && proxy_admin(<bridgehub_proxy>) == <proxy_admin>"
+    notes: "Bridgehub proxy - main entry point for chain registration"
+
+  - id: message_root_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_message_root>"
+      bytecode: "<message_root_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, bridgehub_proxy_deploy]
+    idempotency_check: "code_at(<message_root_impl>) != 0x"
+    postcondition: "code_at(<message_root_impl>) != 0x"
+    notes: "MessageRoot implementation for cross-chain messaging"
+
+  - id: message_root_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<message_root_impl>"
+      - "<proxy_admin>"
+      - "0x"
+    deployment: create
+    depends_on: [message_root_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<message_root_proxy>) != 0x"
+    postcondition: "proxy_impl(<message_root_proxy>) == <message_root_impl>"
+    notes: "MessageRoot proxy"
+
+  - id: ctm_deployment_tracker_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_ctm_tracker>"
+      bytecode: "<ctm_tracker_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, bridgehub_proxy_deploy, message_root_proxy_deploy]
+    idempotency_check: "code_at(<ctm_tracker_impl>) != 0x"
+    postcondition: "code_at(<ctm_tracker_impl>) != 0x"
+    notes: "CTM Deployment Tracker implementation"
+
+  - id: ctm_deployment_tracker_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<ctm_tracker_impl>"
+      - "<proxy_admin>"
+      - "0x"
+    deployment: create
+    depends_on: [ctm_deployment_tracker_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<ctm_tracker_proxy>) != 0x"
+    postcondition: "proxy_impl(<ctm_tracker_proxy>) == <ctm_tracker_impl>"
+    notes: "CTM Deployment Tracker proxy"
+
+  # Phase 3: Diamond Facets & Verification
+  - id: verifier_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_verifier>"
+      bytecode: "<verifier_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<verifier_addr>) != 0x"
+    postcondition: "code_at(<verifier_addr>) != 0x"
+    notes: "Verifier contract for proof verification (no-proofs mode uses dummy verifier)"
+
+  - id: admin_facet_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_admin_facet>"
+      bytecode: "<admin_facet_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<admin_facet_addr>) != 0x"
+    postcondition: "code_at(<admin_facet_addr>) != 0x"
+    notes: "Admin facet for ZK chain diamond proxy"
+
+  - id: mailbox_facet_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_mailbox_facet>"
+      bytecode: "<mailbox_facet_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<mailbox_facet_addr>) != 0x"
+    postcondition: "code_at(<mailbox_facet_addr>) != 0x"
+    notes: "Mailbox facet for L1<>L2 communication"
+
+  - id: executor_facet_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_executor_facet>"
+      bytecode: "<executor_facet_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<executor_facet_addr>) != 0x"
+    postcondition: "code_at(<executor_facet_addr>) != 0x"
+    notes: "Executor facet for batch execution"
+
+  - id: getters_facet_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_getters_facet>"
+      bytecode: "<getters_facet_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<getters_facet_addr>) != 0x"
+    postcondition: "code_at(<getters_facet_addr>) != 0x"
+    notes: "Getters facet for state queries"
+
+  - id: diamond_init_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_diamond_init>"
+      bytecode: "<diamond_init_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<diamond_init_addr>) != 0x"
+    postcondition: "code_at(<diamond_init_addr>) != 0x"
+    notes: "Diamond initialization logic"
+
+  - id: genesis_upgrade_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_genesis_upgrade>"
+      bytecode: "<genesis_upgrade_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<genesis_upgrade_addr>) != 0x"
+    postcondition: "code_at(<genesis_upgrade_addr>) != 0x"
+    notes: "Genesis upgrade contract"
+
+  - id: default_upgrade_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_default_upgrade>"
+      bytecode: "<default_upgrade_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<default_upgrade_addr>) != 0x"
+    postcondition: "code_at(<default_upgrade_addr>) != 0x"
+    notes: "Default upgrade contract for protocol upgrades"
+
+  - id: diamond_proxy_template_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_diamond_proxy>"
+      bytecode: "<diamond_proxy_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<diamond_proxy_addr>) != 0x"
+    postcondition: "code_at(<diamond_proxy_addr>) != 0x"
+    notes: "Diamond proxy template (not used directly, template for chain-specific instances)"
+
+  - id: bytecodes_supplier_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_bytecodes_supplier>"
+      bytecode: "<bytecodes_supplier_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<bytecodes_supplier_addr>) != 0x"
+    postcondition: "code_at(<bytecodes_supplier_addr>) != 0x"
+    notes: "Bytecodes supplier for preimage distribution"
+
+  # Phase 4: Bridge Infrastructure
+  - id: l1_nullifier_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_l1_nullifier>"
+      bytecode: "<l1_nullifier_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, bridgehub_proxy_deploy]
+    idempotency_check: "code_at(<l1_nullifier_impl>) != 0x"
+    postcondition: "code_at(<l1_nullifier_impl>) != 0x"
+    notes: "L1Nullifier implementation"
+
+  - id: l1_nullifier_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<l1_nullifier_impl>"
+      - "<proxy_admin>"
+      - "<l1_nullifier_init_data>"
+    deployment: create
+    depends_on: [l1_nullifier_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<l1_nullifier_proxy>) != 0x"
+    postcondition: "proxy_impl(<l1_nullifier_proxy>) == <l1_nullifier_impl>"
+    notes: "L1Nullifier proxy"
+
+  - id: wrapped_base_token_store_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_wrapped_base_token_store>"
+      bytecode: "<wrapped_base_token_store_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<l1_wrapped_base_token_store>) != 0x"
+    postcondition: "code_at(<l1_wrapped_base_token_store>) != 0x"
+    notes: "L1 Wrapped Base Token Store"
+
+  - id: native_token_vault_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_native_token_vault>"
+      bytecode: "<native_token_vault_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, l1_nullifier_proxy_deploy]
+    idempotency_check: "code_at(<native_token_vault_impl>) != 0x"
+    postcondition: "code_at(<native_token_vault_impl>) != 0x"
+    notes: "Native Token Vault implementation"
+
+  - id: native_token_vault_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<native_token_vault_impl>"
+      - "<proxy_admin>"
+      - "<native_token_vault_init_data>"
+    deployment: create
+    depends_on: [native_token_vault_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<native_token_vault_proxy>) != 0x"
+    postcondition: "proxy_impl(<native_token_vault_proxy>) == <native_token_vault_impl>"
+    notes: "Native Token Vault proxy"
+
+  - id: l1_asset_router_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_shared_bridge>"
+      bytecode: "<shared_bridge_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, l1_nullifier_proxy_deploy, bridgehub_proxy_deploy, native_token_vault_proxy_deploy, wrapped_base_token_store_deploy]
+    idempotency_check: "code_at(<shared_bridge_impl>) != 0x"
+    postcondition: "code_at(<shared_bridge_impl>) != 0x"
+    notes: "L1AssetRouter (SharedBridge) implementation"
+
+  - id: l1_asset_router_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<shared_bridge_impl>"
+      - "<proxy_admin>"
+      - "<shared_bridge_init_data>"
+    deployment: create
+    depends_on: [l1_asset_router_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<shared_bridge_proxy>) != 0x"
+    postcondition: "proxy_impl(<shared_bridge_proxy>) == <shared_bridge_impl>"
+    notes: "L1AssetRouter proxy"
+
+  - id: l1_erc20_bridge_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_erc20_bridge>"
+      bytecode: "<erc20_bridge_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, l1_nullifier_proxy_deploy, l1_asset_router_proxy_deploy, native_token_vault_proxy_deploy]
+    idempotency_check: "code_at(<erc20_bridge_impl>) != 0x"
+    postcondition: "code_at(<erc20_bridge_impl>) != 0x"
+    notes: "L1ERC20Bridge implementation (legacy bridge)"
+
+  - id: l1_erc20_bridge_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<erc20_bridge_impl>"
+      - "<proxy_admin>"
+      - "<erc20_bridge_init_data>"
+    deployment: create
+    depends_on: [l1_erc20_bridge_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<erc20_bridge_proxy>) != 0x"
+    postcondition: "proxy_impl(<erc20_bridge_proxy>) == <erc20_bridge_impl>"
+    notes: "L1ERC20Bridge proxy"
+
+  # Phase 5: Chain Type Manager (CTM)
+  - id: ctm_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_ctm>"
+      bytecode: "<ctm_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy, bridgehub_proxy_deploy]
+    idempotency_check: "code_at(<ctm_impl>) != 0x"
+    postcondition: "code_at(<ctm_impl>) != 0x"
+    notes: "ChainTypeManager (StateTransition) implementation"
+
+  - id: ctm_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<ctm_impl>"
+      - "<proxy_admin>"
+      - "<ctm_init_data>"
+    deployment: create
+    depends_on: [ctm_impl_deploy, proxy_admin_deploy, verifier_deploy, admin_facet_deploy, mailbox_facet_deploy, executor_facet_deploy, getters_facet_deploy, diamond_init_deploy, genesis_upgrade_deploy, default_upgrade_deploy]
+    idempotency_check: "code_at(<state_transition_proxy>) != 0x"
+    postcondition: "proxy_impl(<state_transition_proxy>) == <ctm_impl>"
+    notes: "ChainTypeManager proxy - manages ZK chain deployments and upgrades"
+
+  # Phase 6: DA Validators
+  - id: rollup_da_validator_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_rollup_da_validator>"
+      bytecode: "<rollup_da_validator_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<rollup_l1_da_validator_addr>) != 0x"
+    postcondition: "code_at(<rollup_l1_da_validator_addr>) != 0x"
+    notes: "Rollup L1 DA Validator (for rollup mode)"
+
+  - id: validium_da_validator_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_validium_da_validator>"
+      bytecode: "<validium_da_validator_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<no_da_validium_l1_validator_addr>) != 0x"
+    postcondition: "code_at(<no_da_validium_l1_validator_addr>) != 0x"
+    notes: "Validium L1 DA Validator (for validium mode)"
+
+  - id: rollup_da_manager_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_rollup_da_manager>"
+      bytecode: "<rollup_da_manager_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<l1_rollup_da_manager>) != 0x"
+    postcondition: "code_at(<l1_rollup_da_manager>) != 0x"
+    notes: "Rollup L1 DA Manager"
+
+  # Phase 7: Validator & Admin Contracts
+  - id: validator_timelock_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_validator_timelock>"
+      bytecode: "<validator_timelock_bytecode_with_constructor_args>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<validator_timelock_addr>) != 0x"
+    postcondition: "code_at(<validator_timelock_addr>) != 0x && validatorTimelock.owner() == <owner_address>"
+    notes: "Validator Timelock for delayed batch execution"
+
+  # Phase 8: Utility Contracts
+  - id: server_notifier_impl_deploy
+    from_role: deployer
+    to: "<create2_factory>"
+    method: "create2(bytes32,bytes)"
+    params:
+      salt: "<create2_salt_server_notifier>"
+      bytecode: "<server_notifier_bytecode>"
+    deployment: create2
+    depends_on: [create2_factory_deploy]
+    idempotency_check: "code_at(<server_notifier_impl>) != 0x"
+    postcondition: "code_at(<server_notifier_impl>) != 0x"
+    notes: "Server Notifier implementation"
+
+  - id: server_notifier_proxy_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "TransparentUpgradeableProxy.constructor(address,address,bytes)"
+    params:
+      - "<server_notifier_impl>"
+      - "<proxy_admin>"
+      - "0x"
+    deployment: create
+    depends_on: [server_notifier_impl_deploy, proxy_admin_deploy]
+    idempotency_check: "code_at(<server_notifier_proxy>) != 0x"
+    postcondition: "proxy_impl(<server_notifier_proxy>) == <server_notifier_impl>"
+    notes: "Server Notifier proxy"
+
+  - id: multicall3_deploy
+    from_role: deployer
+    to: "0x0"
+    method: "Multicall3.constructor()"
+    params: []
+    deployment: create
+    depends_on: []
+    idempotency_check: "code_at(<multicall3_addr>) != 0x"
+    postcondition: "code_at(<multicall3_addr>) != 0x"
+    notes: "Multicall3 utility contract"
+
+# Notes on idempotency:
+# - All CREATE2 deployments are naturally idempotent (same salt + bytecode = same address)
+# - CREATE deployments need address tracking to avoid re-deployment
+# - All checks should be performed before attempting deployment
+# - Proxy implementations can be verified via EIP-1967 storage slots
