@@ -252,6 +252,9 @@ impl<'de> Deserialize<'de> for InteropMode {
 #[derive(Debug, Serialize, Deserialize, Clone)]
 #[serde(rename_all = "camelCase")]
 pub struct L2ToL1LogProof {
+    /// The L1 batch number where the log was included.
+    #[serde(rename = "batch_number")]
+    pub l1_batch_number: L1BatchNumber,
     /// The merkle path for the leaf.
     pub proof: Vec<H256>,
     /// The id of the leaf in a tree.
