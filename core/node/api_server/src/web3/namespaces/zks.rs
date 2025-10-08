@@ -213,6 +213,7 @@ impl ZksNamespace {
 
         if protocol_version.is_pre_gateway() {
             return Ok(Some(L2ToL1LogProof {
+                l1_batch_number,
                 proof,
                 root: local_root,
                 id: l1_log_index as u32,
@@ -284,6 +285,7 @@ impl ZksNamespace {
         };
 
         Ok(Some(L2ToL1LogProof {
+            l1_batch_number,
             proof,
             root,
             id: l1_log_index as u32,
