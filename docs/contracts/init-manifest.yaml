@@ -1,0 +1,354 @@
+# ZK Stack Initialization Manifest
+# This manifest describes the L1 initialization sequence after contracts are deployed
+# to register and configure a ZK Stack chain (Localhost rollup mode)
+
+init_plan:
+  # Phase 0: Fund Wallets (Localhost only)
+  - id: distribute_eth_to_wallets
+    from_role: ecosystem_operator
+    method: "ETH transfers via provider.sendTransaction()"
+    params:
+      recipients:
+        - "<chain_operator>"
+        - "<chain_blob_operator>"
+        - "<chain_governor>"
+        - "<chain_deployer>"
+        - "<chain_token_multiplier_setter>"
+      amount_each: "1000 ETH"
+    depends_on: []
+    idempotency_check: "balance(<recipient>) >= 1000 ETH"
+    postcondition: "all recipients have >= 1000 ETH"
+    notes: "Distribute ETH to chain wallets for gas (Localhost L1Network only)"
+    optional: true
+    localhost_only: true
+
+  - id: mint_base_token_to_wallets
+    from_role: ecosystem_governor
+    method: "BaseToken.mint(address,uint256)"
+    params:
+      recipients:
+        - "<ecosystem_governor>"
+        - "<chain_governor>"
+      amount_each: "<1000 * nominator / denominator base tokens>"
+    depends_on: []
+    idempotency_check: "baseToken.balanceOf(<recipient>) >= <amount>"
+    postcondition: "all recipients have sufficient base token balance"
+    notes: "Mint base tokens to governors (Localhost only, if using non-ETH base token)"
+    optional: true
+    localhost_only: true
+  # Phase 1: CTM Registration (if using new CTM)
+  - id: register_ctm
+    from_role: governor
+    to: "<bridgehub_proxy>"
+    method: "addChainTypeManager(address)"
+    params:
+      - "<state_transition_proxy>"
+    depends_on: []
+    idempotency_check: "bridgehub.chainTypeManagerIsRegistered(<state_transition_proxy>) == true"
+    postcondition: "bridgehub.chainTypeManagerIsRegistered(<state_transition_proxy>) == true"
+    notes: "Register the ChainTypeManager with Bridgehub"
+
+  # Phase 2: Accept Ownership (Ecosystem Contracts)
+  - id: accept_bridgehub_ownership
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "governanceAcceptOwner(address,address)"
+    params:
+      - "<governance_addr>"
+      - "<bridgehub_proxy>"
+    depends_on: []
+    idempotency_check: "bridgehub.owner() == <governance_addr>"
+    postcondition: "bridgehub.owner() == <governance_addr>"
+    notes: "Transfer Bridgehub ownership from deployer to governance"
+
+  - id: accept_ctm_ownership
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "governanceAcceptOwner(address,address)"
+    params:
+      - "<governance_addr>"
+      - "<state_transition_proxy>"
+    depends_on: []
+    idempotency_check: "chainTypeManager.owner() == <governance_addr>"
+    postcondition: "chainTypeManager.owner() == <governance_addr>"
+    notes: "Transfer ChainTypeManager ownership from deployer to governance"
+
+  - id: accept_validator_timelock_ownership
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "governanceAcceptOwner(address,address)"
+    params:
+      - "<governance_addr>"
+      - "<validator_timelock_addr>"
+    depends_on: []
+    idempotency_check: "validatorTimelock.owner() == <governance_addr>"
+    postcondition: "validatorTimelock.owner() == <governance_addr>"
+    notes: "Transfer ValidatorTimelock ownership from deployer to governance"
+
+  # Phase 3: Deploy Chain-Specific Admin Contracts
+  - id: deploy_access_control_restriction
+    from_role: deployer
+    to: "0x0"
+    method: "AccessControlRestriction.constructor(uint256,address)"
+    params:
+      - "<governance_min_delay>"
+      - "<owner_address>"
+    deployment: create
+    depends_on: []
+    idempotency_check: "code_at(<access_control_restriction_addr>) != 0x"
+    postcondition: "code_at(<access_control_restriction_addr>) != 0x"
+    notes: "Deploy AccessControlRestriction for chain admin role management"
+
+  - id: deploy_chain_admin
+    from_role: deployer
+    to: "0x0"
+    method: "ChainAdmin.constructor(address[],address)"
+    params:
+      - "[<access_control_restriction_addr>]"
+      - "<initial_owner>"
+    deployment: create
+    depends_on: [deploy_access_control_restriction]
+    idempotency_check: "code_at(<chain_admin_addr>) != 0x"
+    postcondition: "code_at(<chain_admin_addr>) != 0x"
+    notes: "Deploy ChainAdmin contract for per-chain administration"
+
+  # Phase 4: Register ZK Chain via Bridgehub
+  - id: register_zk_chain
+    from_role: governor
+    to: "<bridgehub_proxy>"
+    method: "createNewChain(uint256,address,address,uint256,address,bytes,bytes)"
+    params:
+      chain_id: "<chain_id>"
+      chain_type_manager: "<state_transition_proxy>"
+      base_token: "<base_token_addr>"
+      salt: "<bridgehub_create_new_chain_salt>"
+      admin: "<chain_admin_addr>"
+      init_data: "<diamond_cut_data>"
+      factory_deps: "<force_deployments_data>"
+    depends_on: [register_ctm, deploy_chain_admin, accept_bridgehub_ownership, accept_ctm_ownership]
+    idempotency_check: "bridgehub.getZKChain(<chain_id>) != 0x0"
+    postcondition: |
+      event(Bridgehub.ChainRegistered, chainId=<chain_id>) &&
+      event(ChainTypeManager.NewZKChain, chainId=<chain_id>) &&
+      bridgehub.getZKChain(<chain_id>) == <diamond_proxy_addr>
+    notes: "Register new ZK chain and deploy its diamond proxy via Bridgehub"
+
+  # Phase 5: Accept Admin Ownership for Chain Contracts
+  - id: accept_chain_admin_ownership
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "chainAdminAcceptAdmin(address,address)"
+    params:
+      - "<chain_admin_addr>"
+      - "<diamond_proxy_addr>"
+    depends_on: [register_zk_chain]
+    idempotency_check: "zkChain.getAdmin() == <chain_admin_addr>"
+    postcondition: "zkChain.getAdmin() == <chain_admin_addr>"
+    notes: "Accept admin role for the ZK chain diamond proxy"
+
+  # Phase 6: Configure Base Token (if not ETH)
+  - id: set_token_multiplier_setter
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "chainSetTokenMultiplierSetter(address,address,address,address)"
+    params:
+      - "<chain_admin_addr>"
+      - "<access_control_restriction_addr>"
+      - "<diamond_proxy_addr>"
+      - "<token_multiplier_setter_addr>"
+    depends_on: [accept_chain_admin_ownership]
+    idempotency_check: "zkChain.getTokenMultiplierSetter() == <token_multiplier_setter_addr>"
+    postcondition: "zkChain.getTokenMultiplierSetter() == <token_multiplier_setter_addr>"
+    notes: "Set token multiplier setter for base token gas pricing (if using non-ETH base token)"
+
+  # Phase 7: Configure DA Validator Pair
+  - id: set_da_validator_pair
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "setDAValidatorPair(address,uint256,address,address,bool)"
+    params:
+      - "<bridgehub_proxy>"
+      - "<chain_id>"
+      - "<l1_da_validator_addr>"
+      - "<l2_da_validator_addr>"
+      - "true"
+    depends_on: [register_zk_chain]
+    idempotency_check: "zkChain.getDAValidatorPair() == (<l1_da_validator_addr>, <l2_da_validator_addr>)"
+    postcondition: "zkChain.getDAValidatorPair() == (<l1_da_validator_addr>, <l2_da_validator_addr>)"
+    notes: "Set L1 and L2 DA validator pair for rollup/validium mode"
+
+  # Phase 8: Configure Validators
+  - id: add_validator_commit
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "updateValidator(address,address,address,uint256,address,bool)"
+    params:
+      - "<chain_admin_addr>"
+      - "<access_control_restriction_addr>"
+      - "<validator_timelock_addr>"
+      - "<chain_id>"
+      - "<validator_sender_operator_commit_eth>"
+      - "true"
+    depends_on: [accept_chain_admin_ownership, accept_validator_timelock_ownership]
+    idempotency_check: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_commit_eth>) == true"
+    postcondition: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_commit_eth>) == true"
+    notes: "Add commit validator (operator_commit) to ValidatorTimelock"
+
+  - id: add_validator_blobs
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "updateValidator(address,address,address,uint256,address,bool)"
+    params:
+      - "<chain_admin_addr>"
+      - "<access_control_restriction_addr>"
+      - "<validator_timelock_addr>"
+      - "<chain_id>"
+      - "<validator_sender_operator_blobs_eth>"
+      - "true"
+    depends_on: [accept_chain_admin_ownership, accept_validator_timelock_ownership]
+    idempotency_check: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_blobs_eth>) == true"
+    postcondition: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_blobs_eth>) == true"
+    notes: "Add blob operator validator to ValidatorTimelock"
+
+  - id: add_validator_prove
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "updateValidator(address,address,address,uint256,address,bool)"
+    params:
+      - "<chain_admin_addr>"
+      - "<access_control_restriction_addr>"
+      - "<validator_timelock_addr>"
+      - "<chain_id>"
+      - "<validator_sender_operator_prove>"
+      - "true"
+    depends_on: [accept_chain_admin_ownership, accept_validator_timelock_ownership]
+    idempotency_check: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_prove>) == true"
+    postcondition: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_prove>) == true"
+    notes: "Add prove operator validator to ValidatorTimelock (if different from commit)"
+    optional: true
+
+  - id: add_validator_execute
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "updateValidator(address,address,address,uint256,address,bool)"
+    params:
+      - "<chain_admin_addr>"
+      - "<access_control_restriction_addr>"
+      - "<validator_timelock_addr>"
+      - "<chain_id>"
+      - "<validator_sender_operator_execute>"
+      - "true"
+    depends_on: [accept_chain_admin_ownership, accept_validator_timelock_ownership]
+    idempotency_check: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_execute>) == true"
+    postcondition: "validatorTimelock.validators(<chain_id>, <validator_sender_operator_execute>) == true"
+    notes: "Add execute operator validator to ValidatorTimelock (if different from commit)"
+    optional: true
+
+  # Phase 9: Make Permanent Rollup (Optional)
+  - id: make_permanent_rollup
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "makePermanentRollup(address,address)"
+    params:
+      - "<chain_admin_addr>"
+      - "<diamond_proxy_addr>"
+    depends_on: [accept_chain_admin_ownership]
+    idempotency_check: "zkChain.isPermanentRollup() == true"
+    postcondition: "zkChain.isPermanentRollup() == true"
+    notes: "Make the chain a permanent rollup (irreversible, optional)"
+    optional: true
+
+  # Phase 10: Initialize Legacy Bridge (Optional)
+  - id: initialize_legacy_bridge
+    from_role: governor
+    to: "<accept_governance_script>"
+    method: "governanceExecuteCalls(bytes,address)"
+    params:
+      calls_to_execute: "<encoded_legacy_bridge_init_calls>"
+      target: "<governance_addr>"
+    depends_on: [register_zk_chain]
+    idempotency_check: "legacyBridge.isInitialized(<chain_id>) == true"
+    postcondition: "legacyBridge.isInitialized(<chain_id>) == true"
+    notes: "Initialize legacy L1ERC20Bridge for the chain (if legacy_bridge flag is set)"
+    optional: true
+
+# L2 Genesis Configuration (Applied during L2 chain startup, not L1 transactions)
+l2_genesis_plan:
+  - id: deploy_l2_legacy_shared_bridge
+    notes: "L2SharedBridge deployed as part of genesis"
+    address: "<l2_legacy_shared_bridge_addr>"
+    predeployed: true
+
+  - id: deploy_l2_asset_router
+    notes: "L2AssetRouter deployed at known address"
+    address: "L2_ASSET_ROUTER_ADDRESS (0x10003)"
+    predeployed: true
+
+  - id: deploy_l2_native_token_vault
+    notes: "L2NativeTokenVault deployed at known address"
+    address: "L2_NATIVE_TOKEN_VAULT_ADDRESS (0x10004)"
+    predeployed: true
+
+  - id: deploy_l2_da_validator
+    notes: "L2DAValidator deployed as part of genesis"
+    address: "<l2_da_validator_addr>"
+    predeployed: true
+
+  - id: deploy_l2_multicall3
+    notes: "Multicall3 utility deployed on L2"
+    predeployed: true
+
+  - id: deploy_l2_timestamp_asserter
+    notes: "TimestampAsserter deployed on L2"
+    predeployed: true
+
+  - id: deploy_l2_consensus_registry
+    notes: "ConsensusRegistry for L2 consensus nodes"
+    constructor_params:
+      - "<owner>"
+      - "<node_owners>[]"
+      - "<validator_timelock_addr>"
+    predeployed: true
+
+  - id: deploy_l2_testnet_paymaster
+    notes: "TestnetPaymaster (optional, for testnet only)"
+    predeployed: true
+    optional: true
+
+# Phase 11: Generate Genesis (Localhost - before starting L2)
+genesis_generation:
+  - id: generate_genesis_config
+    notes: "Generate genesis.yaml with initial state root and commitment"
+    method: "zkstack chain genesis init"
+    depends_on: [register_zk_chain]
+    output_files:
+      - "chains/<chain-name>/configs/genesis.yaml"
+    notes: "Generates genesis state root, rollup leaf index, and batch commitment"
+
+  - id: run_genesis_on_server
+    notes: "Initialize server database with genesis state"
+    method: "zkstack server genesis"
+    depends_on: [generate_genesis_config]
+    notes: "Populates Postgres DB with genesis block and state"
+
+# Notes on Roles:
+# - governor: L1 Governance contract (or owner for localhost)
+# - deployer: Address that deploys contracts (typically has no ongoing permissions)
+# - operator_commit: Validator address for committing batches
+# - operator_blobs: Validator address for blob-based batch commitments
+# - operator_prove: Validator address for proving batches (may be same as commit)
+# - operator_execute: Validator address for executing batches (may be same as commit)
+# - token_multiplier_setter: Address that can update token multiplier (for non-ETH base tokens)
+
+# Notes on Idempotency:
+# - All registration checks query Bridgehub/ChainTypeManager state
+# - Ownership transfers check current owner via view functions
+# - Validator additions check validator status in ValidatorTimelock
+# - DA validator pair checks query zkChain diamond proxy
+# - Re-running init with same parameters should be safe (no-op if already done)
+
+# Notes on Optional Steps:
+# - make_permanent_rollup: Only if --make-permanent-rollup flag is set
+# - initialize_legacy_bridge: Only if --initialize-legacy-bridge flag is set
+# - add_validator_prove/execute: Only if separate prove/execute operators are configured
+# - set_token_multiplier_setter: Only for non-ETH base tokens

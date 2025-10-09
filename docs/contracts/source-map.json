@@ -1,0 +1,453 @@
+{
+  "deploy_plan": {
+    "create2_factory_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "CREATE2 factory deployed as part of L1 core contracts deployment"
+    },
+    "proxy_admin_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "ProxyAdmin deployed for managing all transparent proxies"
+    },
+    "governance_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "Governance contract with timelock functionality"
+    },
+    "bridgehub_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "Bridgehub implementation contract"
+    },
+    "bridgehub_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "Bridgehub proxy deployment"
+    },
+    "message_root_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "MessageRoot implementation"
+    },
+    "message_root_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "MessageRoot proxy"
+    },
+    "ctm_deployment_tracker_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "CTM Deployment Tracker implementation"
+    },
+    "ctm_deployment_tracker_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "CTM Deployment Tracker proxy"
+    },
+    "verifier_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "Verifier contract (TestnetVerifier for no-proofs mode)"
+    },
+    "admin_facet_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "AdminFacet for diamond proxy"
+    },
+    "mailbox_facet_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "MailboxFacet for L1<>L2 messaging"
+    },
+    "executor_facet_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ExecutorFacet for batch execution"
+    },
+    "getters_facet_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "GettersFacet for state queries"
+    },
+    "diamond_init_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "DiamondInit contract"
+    },
+    "genesis_upgrade_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "GenesisUpgrade contract"
+    },
+    "default_upgrade_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "DefaultUpgrade contract"
+    },
+    "diamond_proxy_template_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "DiamondProxy template"
+    },
+    "bytecodes_supplier_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "L1BytecodesSupplier contract"
+    },
+    "l1_nullifier_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1Nullifier implementation"
+    },
+    "l1_nullifier_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1Nullifier proxy"
+    },
+    "wrapped_base_token_store_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "L1WrappedBaseTokenStore"
+    },
+    "native_token_vault_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "NativeTokenVault implementation"
+    },
+    "native_token_vault_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "NativeTokenVault proxy"
+    },
+    "l1_asset_router_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1AssetRouter (SharedBridge) implementation"
+    },
+    "l1_asset_router_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1AssetRouter proxy"
+    },
+    "l1_erc20_bridge_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1ERC20Bridge implementation"
+    },
+    "l1_erc20_bridge_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_l1_core_contracts",
+      "forge_script": "l1-contracts/deploy-scripts/DeployL1CoreContracts.s.sol",
+      "lines": [47, 120],
+      "notes": "L1ERC20Bridge proxy"
+    },
+    "ctm_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ChainTypeManager (StateTransition) implementation"
+    },
+    "ctm_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ChainTypeManager proxy with diamond cut data"
+    },
+    "rollup_da_validator_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "Rollup L1 DA Validator"
+    },
+    "validium_da_validator_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "Validium L1 DA Validator"
+    },
+    "rollup_da_manager_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "Rollup L1 DA Manager"
+    },
+    "validator_timelock_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ValidatorTimelock contract"
+    },
+    "server_notifier_impl_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ServerNotifier implementation"
+    },
+    "server_notifier_proxy_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "ServerNotifier proxy"
+    },
+    "multicall3_deploy": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/common.rs",
+      "function": "deploy_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/DeployCTM.s.sol",
+      "lines": [48, 119],
+      "notes": "Multicall3 utility contract"
+    }
+  },
+  "init_plan": {
+    "register_ctm": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/ecosystem/register_ctm.rs",
+      "function": "register_ctm",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [1, 50],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Register ChainTypeManager with Bridgehub via governance call"
+    },
+    "accept_bridgehub_ownership": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "accept_owner",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [90, 115],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Accept ownership of Bridgehub by governance"
+    },
+    "accept_ctm_ownership": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "accept_owner",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [90, 115],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Accept ownership of ChainTypeManager by governance"
+    },
+    "accept_validator_timelock_ownership": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "accept_owner",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [90, 115],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Accept ownership of ValidatorTimelock by governance"
+    },
+    "deploy_access_control_restriction": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/register_chain.rs",
+      "function": "register_chain",
+      "forge_script": "l1-contracts/deploy-scripts/RegisterZKChain.s.sol",
+      "lines": [49, 92],
+      "broadcast": "l1-contracts/broadcast/RegisterZKChain.s.sol/*/run-*.json",
+      "notes": "AccessControlRestriction deployed as part of chain registration"
+    },
+    "deploy_chain_admin": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/register_chain.rs",
+      "function": "register_chain",
+      "forge_script": "l1-contracts/deploy-scripts/RegisterZKChain.s.sol",
+      "lines": [49, 92],
+      "broadcast": "l1-contracts/broadcast/RegisterZKChain.s.sol/*/run-*.json",
+      "notes": "ChainAdmin deployed as part of chain registration"
+    },
+    "register_zk_chain": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/register_chain.rs",
+      "function": "register_chain",
+      "forge_script": "l1-contracts/deploy-scripts/RegisterZKChain.s.sol",
+      "lines": [49, 92],
+      "broadcast": "l1-contracts/broadcast/RegisterZKChain.s.sol/*/run-*.json",
+      "notes": "Register new ZK chain via Bridgehub.createNewChain()"
+    },
+    "accept_chain_admin_ownership": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "accept_admin",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [60, 88],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Accept admin role for ZK chain diamond proxy"
+    },
+    "set_token_multiplier_setter": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/set_token_multiplier_setter.rs",
+      "function": "set_token_multiplier_setter",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [74, 112],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Set token multiplier setter via chainSetTokenMultiplierSetter"
+    },
+    "set_da_validator_pair": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "set_da_validator_pair",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [380, 430],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Set DA validator pair via governance call"
+    },
+    "add_validator_commit": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "admin_update_validator",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [335, 375],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Add commit validator via updateValidator"
+    },
+    "add_validator_blobs": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "admin_update_validator",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [335, 375],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Add blob operator validator via updateValidator"
+    },
+    "add_validator_prove": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "admin_update_validator",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [335, 375],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Add prove operator validator (if separate from commit)"
+    },
+    "add_validator_execute": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "admin_update_validator",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [335, 375],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Add execute operator validator (if separate from commit)"
+    },
+    "make_permanent_rollup": {
+      "file": "zkstack_cli/crates/zkstack/src/admin_functions.rs",
+      "function": "make_permanent_rollup",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [117, 149],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Make chain a permanent rollup via makePermanentRollup"
+    },
+    "initialize_legacy_bridge": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/setup_legacy_bridge.rs",
+      "function": "setup_legacy_bridge",
+      "forge_script": "l1-contracts/deploy-scripts/AcceptAdmin.s.sol",
+      "lines": [1, 100],
+      "broadcast": "l1-contracts/broadcast/AcceptAdmin.s.sol/*/run-*.json",
+      "notes": "Initialize legacy L1ERC20Bridge if requested"
+    }
+  },
+  "l2_deployment": {
+    "deploy_l2_contracts": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/deploy_l2_contracts.rs",
+      "function": "deploy_l2_contracts",
+      "forge_script": "l2-contracts/script/DeployL2.s.sol",
+      "lines": [1, 100],
+      "broadcast": "l2-contracts/broadcast/DeployL2.s.sol/*/run-*.json",
+      "notes": "Deploy all L2 predeployed contracts as part of genesis"
+    },
+    "deploy_paymaster": {
+      "file": "zkstack_cli/crates/zkstack/src/commands/chain/deploy_paymaster.rs",
+      "function": "deploy_paymaster",
+      "forge_script": "l2-contracts/script/DeployPaymaster.s.sol",
+      "lines": [1, 50],
+      "broadcast": "l2-contracts/broadcast/DeployPaymaster.s.sol/*/run-*.json",
+      "notes": "Deploy TestnetPaymaster (optional, testnet only)"
+    }
+  },
+  "wallet_roles": {
+    "deployer": {
+      "config": "configs/wallets.yaml",
+      "field": "deployer",
+      "notes": "Deploys all contracts, no ongoing permissions after ownership transfers"
+    },
+    "governor": {
+      "config": "configs/wallets.yaml",
+      "field": "governor",
+      "notes": "Controls governance, accepts ownership, manages upgrades and configuration"
+    },
+    "operator_commit": {
+      "config": "configs/wallets.yaml",
+      "field": "operator.address",
+      "notes": "Commits batches to L1"
+    },
+    "operator_blobs": {
+      "config": "configs/wallets.yaml",
+      "field": "blob_operator.address",
+      "notes": "Commits batches with blob data to L1"
+    },
+    "operator_prove": {
+      "config": "configs/wallets.yaml",
+      "field": "prove_operator.address",
+      "notes": "Proves batches (optional, may be same as commit operator)"
+    },
+    "operator_execute": {
+      "config": "configs/wallets.yaml",
+      "field": "execute_operator.address",
+      "notes": "Executes batches (optional, may be same as commit operator)"
+    },
+    "fee_account": {
+      "config": "configs/wallets.yaml",
+      "field": "fee_account.address",
+      "notes": "Receives fees from the chain"
+    },
+    "token_multiplier_setter": {
+      "config": "configs/wallets.yaml",
+      "field": "token_multiplier_setter.address",
+      "notes": "Can update token multiplier for non-ETH base tokens (optional)"
+    }
+  }
+}

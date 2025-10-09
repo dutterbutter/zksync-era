@@ -1,0 +1,654 @@
+{
+  "contracts": [
+    {
+      "name": "Create2Factory",
+      "artifact": "Create2Factory",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "TransparentProxyAdmin",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "from_event",
+      "admin_owner": "deployer",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "Governance",
+      "artifact": "Governance",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<owner_address>",
+        "<governance_security_council_address>",
+        "<governance_min_delay>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "owner (governor)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "Bridgehub Implementation",
+      "artifact": "Bridgehub",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_bridgehub>",
+      "constructor_args": [
+        "<l1_chain_id>",
+        "<owner_address>",
+        "<max_number_of_chains>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "Bridgehub Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<bridgehub_impl>",
+        "<proxy_admin>",
+        "0x"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "CTM Deployment Tracker Implementation",
+      "artifact": "CTMDeploymentTracker",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_ctm_tracker>",
+      "constructor_args": [
+        "<bridgehub_proxy>",
+        "<message_root_addr>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "CTM Deployment Tracker Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<ctm_tracker_impl>",
+        "<proxy_admin>",
+        "0x"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "MessageRoot Implementation",
+      "artifact": "MessageRoot",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_message_root>",
+      "constructor_args": [
+        "<bridgehub_proxy>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "MessageRoot Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<message_root_impl>",
+        "<proxy_admin>",
+        "0x"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ChainTypeManager Implementation",
+      "artifact": "ChainTypeManager",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_ctm>",
+      "constructor_args": [
+        "<bridgehub_proxy>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ChainTypeManager Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<ctm_impl>",
+        "<proxy_admin>",
+        "<init_data>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "Verifier",
+      "artifact": "Verifier",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_verifier>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "AdminFacet",
+      "artifact": "AdminFacet",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_admin_facet>",
+      "constructor_args": [
+        "<l1_chain_id>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (facet)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "MailboxFacet",
+      "artifact": "MailboxFacet",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_mailbox_facet>",
+      "constructor_args": [
+        "<l1_chain_id>",
+        "<era_chain_id>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (facet)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ExecutorFacet",
+      "artifact": "ExecutorFacet",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_executor_facet>",
+      "constructor_args": [
+        "<l1_chain_id>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (facet)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "GettersFacet",
+      "artifact": "GettersFacet",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_getters_facet>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none (facet)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "DiamondInit",
+      "artifact": "DiamondInit",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_diamond_init>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "GenesisUpgrade",
+      "artifact": "GenesisUpgrade",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_genesis_upgrade>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "DefaultUpgrade",
+      "artifact": "DefaultUpgrade",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_default_upgrade>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "DiamondProxy",
+      "artifact": "DiamondProxy",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_diamond_proxy>",
+      "constructor_args": [
+        "<l1_chain_id>",
+        "<diamond_cut_data>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (template)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1ERC20Bridge Implementation",
+      "artifact": "L1ERC20Bridge",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_erc20_bridge>",
+      "constructor_args": [
+        "<l1_nullifier_proxy>",
+        "<l1_asset_router_proxy>",
+        "<native_token_vault_proxy>",
+        "<era_chain_id>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1ERC20Bridge Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<erc20_bridge_impl>",
+        "<proxy_admin>",
+        "<init_data>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1AssetRouter Implementation",
+      "artifact": "L1AssetRouter",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_shared_bridge>",
+      "constructor_args": [
+        "<l1_chain_id>",
+        "<era_chain_id>",
+        "<l1_nullifier_proxy>",
+        "<bridgehub_proxy>",
+        "<l1_native_token_vault_proxy>",
+        "<l1_wrapped_base_token_store>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1AssetRouter Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<shared_bridge_impl>",
+        "<proxy_admin>",
+        "<init_data>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1Nullifier Implementation",
+      "artifact": "L1Nullifier",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_l1_nullifier>",
+      "constructor_args": [
+        "<bridgehub_proxy>",
+        "<era_chain_id>",
+        "<l1_asset_router_proxy>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1Nullifier Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<l1_nullifier_impl>",
+        "<proxy_admin>",
+        "<init_data>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "NativeTokenVault Implementation",
+      "artifact": "L1NativeTokenVault",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_native_token_vault>",
+      "constructor_args": [
+        "<token_weth_address>",
+        "<l1_asset_router_proxy>",
+        "<l1_nullifier_proxy>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "NativeTokenVault Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<native_token_vault_impl>",
+        "<proxy_admin>",
+        "<init_data>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L1WrappedBaseTokenStore",
+      "artifact": "L1WrappedBaseTokenStore",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_wrapped_base_token_store>",
+      "constructor_args": [
+        "<l1_asset_router_proxy>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ValidatorTimelock",
+      "artifact": "ValidatorTimelock",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_validator_timelock>",
+      "constructor_args": [
+        "<owner_address>",
+        "<validator_timelock_execution_delay>",
+        "<era_chain_id>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "owner (governor)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ChainAdmin",
+      "artifact": "ChainAdmin",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<restrictions>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "owner (governor)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "AccessControlRestriction",
+      "artifact": "AccessControlRestriction",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<governance_min_delay>",
+        "<owner_address>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "owner (governor)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "RollupL1DAValidator",
+      "artifact": "RollupL1DAValidator",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_rollup_da_validator>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "rollup"
+    },
+    {
+      "name": "ValidiumL1DAValidator",
+      "artifact": "ValidiumL1DAValidator",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_validium_da_validator>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "validium"
+    },
+    {
+      "name": "RollupL1DAManager",
+      "artifact": "RollupL1DAManager",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_rollup_da_manager>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "rollup"
+    },
+    {
+      "name": "L1BytecodesSupplier",
+      "artifact": "L1BytecodesSupplier",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_bytecodes_supplier>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ServerNotifier Implementation",
+      "artifact": "ServerNotifier",
+      "deployment": "create2",
+      "create2_salt": "<create2_salt_server_notifier>",
+      "constructor_args": [],
+      "address_source": "deterministic",
+      "admin_owner": "none (logic contract)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ServerNotifier Proxy",
+      "artifact": "TransparentUpgradeableProxy",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [
+        "<server_notifier_impl>",
+        "<proxy_admin>",
+        "0x"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "proxy_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "Multicall3",
+      "artifact": "Multicall3",
+      "deployment": "create",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "from_event",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ZKChain Diamond Proxy",
+      "artifact": "DiamondProxy (instance)",
+      "deployment": "create2 (via Bridgehub)",
+      "create2_salt": "<bridgehub_create_new_chain_salt>",
+      "constructor_args": [
+        "<chain_specific_diamond_cut>"
+      ],
+      "address_source": "deterministic",
+      "admin_owner": "chain_admin",
+      "events_to_watch": [
+        "Bridgehub.ChainRegistered",
+        "ChainTypeManager.NewZKChain"
+      ],
+      "mode": "both"
+    },
+    {
+      "name": "ChainProxyAdmin",
+      "artifact": "ProxyAdmin",
+      "deployment": "create (during registration)",
+      "create2_salt": null,
+      "constructor_args": [
+        "<chain_admin_addr>"
+      ],
+      "address_source": "from_event",
+      "admin_owner": "chain_admin",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L2LegacySharedBridge",
+      "artifact": "L2SharedBridge",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [
+        "<genesis_params>"
+      ],
+      "address_source": "known_constant",
+      "admin_owner": "governor",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L2AssetRouter",
+      "artifact": "L2AssetRouter",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [
+        "<genesis_params>"
+      ],
+      "address_source": "known_constant (L2_ASSET_ROUTER_ADDRESS)",
+      "admin_owner": "governor",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L2NativeTokenVault",
+      "artifact": "L2NativeTokenVault",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [
+        "<genesis_params>"
+      ],
+      "address_source": "known_constant (L2_NATIVE_TOKEN_VAULT_ADDRESS)",
+      "admin_owner": "governor",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L2DAValidator",
+      "artifact": "L2DAValidator (Rollup/Validium)",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [
+        "<genesis_params>"
+      ],
+      "address_source": "from_deployment",
+      "admin_owner": "governor",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "L2 Multicall3",
+      "artifact": "Multicall3",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "from_deployment",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "TimestampAsserter",
+      "artifact": "TimestampAsserter",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "from_deployment",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "ConsensusRegistry",
+      "artifact": "ConsensusRegistry",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [
+        "<owner>",
+        "<node_owners>[]",
+        "<validator_timelock>"
+      ],
+      "address_source": "from_deployment",
+      "admin_owner": "owner (governor)",
+      "events_to_watch": [],
+      "mode": "both"
+    },
+    {
+      "name": "TestnetPaymaster",
+      "artifact": "TestnetPaymaster (optional)",
+      "deployment": "predeployed",
+      "create2_salt": null,
+      "constructor_args": [],
+      "address_source": "from_deployment",
+      "admin_owner": "none",
+      "events_to_watch": [],
+      "mode": "both"
+    }
+  ]
+}
